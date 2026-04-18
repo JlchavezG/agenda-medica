@@ -13,6 +13,8 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
@@ -36,6 +38,16 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item me-3">
                         <span id="navRole" class="badge bg-primary-subtle text-primary d-none"></span>
+                    </li>
+                    <li class="nav-item">
+                        <button id="btnDashboard" class="btn btn-outline-primary btn-sm d-none px-3 me-2">
+                            <i class="bi bi-bar-chart me-1"></i>Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button id="btnMedicalHistory" class="btn btn-outline-info btn-sm d-none px-3 me-2">
+                            <i class="bi bi-file-earmark-medical me-1"></i>Historial
+                        </button>
                     </li>
                     <li class="nav-item">
                         <button id="btnLogout" class="btn btn-outline-danger btn-sm d-none px-4">
@@ -94,7 +106,7 @@
                             </div>
                         </div>
                         <small class="text-muted d-block mt-2">
-                            <i class="bi bi-info-circle me-1"></i>Los doctores podrán configurar su disponibilidad
+                            <i class="bi bi-info-circle me-1"></i>Los doctores podrán guardar historial médico
                         </small>
                     </div>
 
@@ -156,6 +168,169 @@
                 </div>
             </div>
 
+            <!-- DASHBOARD PANEL (Solo Doctores) -->
+            <div id="dashboardPanel" class="d-none mb-3">
+                <div class="bento-item">
+                    <div class="bento-header">
+                        <div class="bento-icon bg-info">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h3 class="bento-title">Dashboard de Estadísticas</h3>
+                        <button class="btn btn-sm btn-outline-primary ms-auto" onclick="window.refreshDashboard()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+                        </button>
+                    </div>
+                    
+                    <!-- KPI Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3 col-sm-6">
+                            <div class="dashboard-kpi kpi-primary">
+                                <div class="kpi-icon"><i class="bi bi-calendar-check"></i></div>
+                                <div class="kpi-content">
+                                    <span class="kpi-number" id="kpiTotalCitas">0</span>
+                                    <span class="kpi-label">Total Citas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="dashboard-kpi kpi-success">
+                                <div class="kpi-icon"><i class="bi bi-check-circle"></i></div>
+                                <div class="kpi-content">
+                                    <span class="kpi-number" id="kpiConfirmadas">0</span>
+                                    <span class="kpi-label">Confirmadas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="dashboard-kpi kpi-warning">
+                                <div class="kpi-icon"><i class="bi bi-clock"></i></div>
+                                <div class="kpi-content">
+                                    <span class="kpi-number" id="kpiPendientes">0</span>
+                                    <span class="kpi-label">Pendientes</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="dashboard-kpi kpi-info">
+                                <div class="kpi-icon"><i class="bi bi-people"></i></div>
+                                <div class="kpi-content">
+                                    <span class="kpi-number" id="kpiPacientes">0</span>
+                                    <span class="kpi-label">Pacientes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="chart-container">
+                                <h5 class="chart-title">📈 Citas por Mes</h5>
+                                <canvas id="appointmentsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="chart-container">
+                                <h5 class="chart-title">📊 Estado de Citas</h5>
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Stats -->
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <div class="dashboard-stat-card">
+                                <h6 class="stat-card-title">🎯 Tasa de Confirmación</h6>
+                                <div class="stat-card-value" id="confirmationRate">0%</div>
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success" id="confirmationProgress" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="dashboard-stat-card">
+                                <h6 class="stat-card-title">❌ Tasa de Cancelación</h6>
+                                <div class="stat-card-value" id="cancellationRate">0%</div>
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar bg-danger" id="cancellationProgress" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORIAL MÉDICO PANEL -->
+            <div id="medicalHistoryPanel" class="d-none mb-3">
+                <div class="bento-item">
+                    <div class="bento-header">
+                        <div class="bento-icon bg-info">
+                            <i class="bi bi-file-earmark-medical"></i>
+                        </div>
+                        <h3 class="bento-title">Historial Médico</h3>
+                        <button class="btn btn-sm btn-outline-primary ms-auto" onclick="window.toggleMedicalHistory()">
+                            <i class="bi bi-x-lg me-1"></i>Cerrar
+                        </button>
+                    </div>
+                    
+                    <!-- Información del Paciente -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="medical-info-card">
+                                <h6 class="medical-info-title">👤 Información del Paciente</h6>
+                                <form id="patientMedicalInfoForm">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small">Tipo de Sangre</label>
+                                            <select id="bloodType" class="form-select form-select-sm">
+                                                <option value="">Seleccionar</option>
+                                                <option value="A+">A+</option>
+                                                <option value="A-">A-</option>
+                                                <option value="B+">B+</option>
+                                                <option value="B-">B-</option>
+                                                <option value="O+">O+</option>
+                                                <option value="O-">O-</option>
+                                                <option value="AB+">AB+</option>
+                                                <option value="AB-">AB-</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">Contacto Emergencia</label>
+                                            <input type="text" id="emergencyContact" class="form-control form-control-sm" placeholder="Nombre y teléfono">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small">⚠️ Alergias</label>
+                                            <textarea id="allergies" class="form-control form-control-sm" rows="2" placeholder="Ej: Penicilina, Nueces, Latex..."></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small">📋 Antecedentes Médicos</label>
+                                            <textarea id="medicalAntecedents" class="form-control form-control-sm" rows="2" placeholder="Ej: Diabetes, Hipertensión, Asma..."></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-save me-1"></i>Guardar Información
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="medical-info-card">
+                                <h6 class="medical-info-title">📅 Citas Anteriores</h6>
+                                <div id="pastAppointmentsList" class="past-appointments-list">
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                                        <p class="mt-2 small">Cargando historial...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- VISTA DOCTOR: Perfil Profesional -->
             <div id="doctorPanel" class="d-none mb-3">
                 <div class="bento-item">
@@ -198,28 +373,19 @@
                         </button>
                     </div>
                     
-                    <!-- Vista de Disponibilidad -->
                     <div id="availabilityView">
-                        <div class="row g-3" id="availabilityDaysContainer">
-                            <!-- Se llena dinámicamente -->
-                        </div>
+                        <div class="row g-3" id="availabilityDaysContainer"></div>
                         <div class="mt-3">
-                            <h6 class="fw-semibold mb-2">📅 Fechas Bloqueadas (Vacaciones/Días Libres)</h6>
+                            <h6 class="fw-semibold mb-2">📅 Fechas Bloqueadas</h6>
                             <div id="blockedDatesContainer" class="d-flex flex-wrap gap-2"></div>
                         </div>
                     </div>
                     
-                    <!-- Editor de Disponibilidad (Oculto por defecto) -->
                     <div id="availabilityEditor" class="d-none">
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Configura los días y horarios en que estás disponible para atender pacientes.
+                            <i class="bi bi-info-circle me-2"></i>Configura los días y horarios en que estás disponible.
                         </div>
-                        
-                        <div class="row g-3" id="availabilityEditorContainer">
-                            <!-- Se llena dinámicamente -->
-                        </div>
-                        
+                        <div class="row g-3" id="availabilityEditorContainer"></div>
                         <div class="mt-3">
                             <h6 class="fw-semibold mb-2">📅 Bloquear Fechas Específicas</h6>
                             <div class="row g-2">
@@ -228,16 +394,15 @@
                                 </div>
                                 <div class="col-md-4">
                                     <button type="button" class="btn btn-outline-danger w-100" onclick="window.blockDate()">
-                                        <i class="bi bi-x-circle me-1"></i>Bloquear Fecha
+                                        <i class="bi bi-x-circle me-1"></i>Bloquear
                                     </button>
                                 </div>
                             </div>
                             <div id="blockedDatesEditor" class="d-flex flex-wrap gap-2 mt-2"></div>
                         </div>
-                        
                         <div class="mt-4 d-flex gap-2">
                             <button type="button" class="btn btn-success" onclick="window.saveAvailability()">
-                                <i class="bi bi-check-circle me-2"></i>Guardar Disponibilidad
+                                <i class="bi bi-check-circle me-2"></i>Guardar
                             </button>
                             <button type="button" class="btn btn-outline-secondary" onclick="window.toggleAvailabilityEditor()">
                                 Cancelar
@@ -291,7 +456,7 @@
                                 </label>
                                 <input type="date" id="appointmentDate" class="form-control" required onchange="window.loadAvailableSlots()">
                                 <small id="dateWarning" class="text-warning d-none">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>El doctor no está disponible en esta fecha
+                                    <i class="bi bi-exclamation-triangle me-1"></i>El doctor no está disponible
                                 </small>
                             </div>
 
@@ -302,9 +467,6 @@
                                 <select id="appointmentTime" class="form-select" required disabled>
                                     <option value="">Primero selecciona fecha</option>
                                 </select>
-                                <small id="timeWarning" class="text-warning d-none">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>Selecciona un horario disponible
-                                </small>
                             </div>
 
                             <div class="mb-4">
@@ -368,7 +530,6 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Date min script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.getElementById('appointmentDate');
@@ -378,7 +539,6 @@
             }
             const blockDateInput = document.getElementById('blockDateInput');
             if (blockDateInput) {
-                const today = new Date().toISOString().split('T')[0];
                 blockDateInput.setAttribute('min', today);
             }
         });
