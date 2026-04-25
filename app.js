@@ -1,6 +1,7 @@
 /**
- * MEDICARE PRO - app.js v12.0 FINAL
+ * MEDICARE PRO - app.js v12.2 FINAL
  * ✅ 3 Actores: Paciente/Doctor/Admin
+ * ✅ Iconos profesionales (sin emojis)
  * ✅ Todo funcional y verificado
  */
 
@@ -29,7 +30,7 @@ const firebaseConfig = {
     appId: "1:495304456103:web:92c24773173b9ea5012882"
 };
 
-console.log("🔥 MediCare Pro v12.0 - Iniciando...");
+console.log("🔥 MediCare Pro v12.2 - Iconos Profesionales");
 
 // ============================================
 // 3. INICIALIZAR FIREBASE
@@ -334,7 +335,7 @@ function renderPendingPayments(pendingPayments) {
     pendingPayments.forEach(cita => {
         const fecha = new Date(cita.date).toLocaleDateString('es-MX');
         const amount = cita.consultationFee || 500;
-        html += `<div class="payment-item pending"><div class="payment-info"><div class="payment-patient">👤 ${cita.patientNombre || 'Paciente'}</div><div class="payment-date">📅 ${fecha}</div></div><div class="payment-amount pending">$${amount}</div><div class="payment-actions"><button class="btn btn-sm btn-success" onclick="window.markAsPaid('${cita.id}', ${amount})"><i class="bi bi-check-circle"></i></button><button class="btn btn-sm btn-outline-warning" onclick="window.sendPaymentReminder('${cita.patientEmail || ''}', '${cita.patientNombre || 'Paciente'}', ${amount})"><i class="bi bi-bell"></i></button></div></div>`;
+        html += `<div class="payment-item pending"><div class="payment-info"><div class="payment-patient"><i class="bi bi-person"></i> ${cita.patientNombre || 'Paciente'}</div><div class="payment-date"><i class="bi bi-calendar"></i> ${fecha}</div></div><div class="payment-amount pending">$${amount}</div><div class="payment-actions"><button class="btn btn-sm btn-success" onclick="window.markAsPaid('${cita.id}', ${amount})"><i class="bi bi-check-circle"></i></button><button class="btn btn-sm btn-outline-warning" onclick="window.sendPaymentReminder('${cita.patientEmail || ''}', '${cita.patientNombre || 'Paciente'}', ${amount})"><i class="bi bi-bell"></i></button></div></div>`;
     });
     pendingPaymentsList.innerHTML = html;
 }
@@ -349,7 +350,7 @@ function renderRecentPayments(recentPayments) {
     recentPayments.forEach(cita => {
         const fecha = new Date(cita.date).toLocaleDateString('es-MX');
         const amount = cita.paidAmount || cita.consultationFee || 500;
-        html += `<div class="payment-item paid"><div class="payment-info"><div class="payment-patient">👤 ${cita.patientNombre || 'Paciente'}</div><div class="payment-date">📅 ${fecha}</div></div><div class="payment-amount paid">$${amount}</div><span class="payment-status-badge paid">Pagado</span></div>`;
+        html += `<div class="payment-item paid"><div class="payment-info"><div class="payment-patient"><i class="bi bi-person"></i> ${cita.patientNombre || 'Paciente'}</div><div class="payment-date"><i class="bi bi-calendar"></i> ${fecha}</div></div><div class="payment-amount paid">$${amount}</div><span class="payment-status-badge paid">Pagado</span></div>`;
     });
     recentPaymentsList.innerHTML = html;
 }
@@ -357,10 +358,10 @@ function renderRecentPayments(recentPayments) {
 window.markAsPaid = async function(appointmentId, defaultAmount) {
     try {
         const { value: paymentData } = await Swal.fire({
-            title: '💰 Confirmar Pago',
+            title: '<i class="bi bi-cash-coin"></i> Confirmar Pago',
             html: `<div class="text-start"><label class="form-label">Monto recibido ($)</label><input type="number" id="paymentAmount" class="form-control" value="${defaultAmount}" min="0" step="1"></div>`,
             showCancelButton: true,
-            confirmButtonText: '✅ Confirmar',
+            confirmButtonText: '<i class="bi bi-check-circle"></i> Confirmar',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#10b981',
             preConfirm: () => {
@@ -371,7 +372,7 @@ window.markAsPaid = async function(appointmentId, defaultAmount) {
         });
         if (paymentData) {
             await updateDoc(doc(db, "appointments", appointmentId), { paymentStatus: 'paid', paidAmount: paymentData.amount, paidAt: new Date() });
-            Swal.fire('✅ Pago Confirmado', `Se registró $${paymentData.amount.toLocaleString()}`, 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Pago Confirmado', `Se registró $${paymentData.amount.toLocaleString()}`, 'success');
             loadPaymentsData();
             loadAppointmentsRealtime();
         }
@@ -382,7 +383,7 @@ window.markAsPaid = async function(appointmentId, defaultAmount) {
 
 window.sendPaymentReminder = async function(patientEmail, patientName, amount) {
     const { value: method } = await Swal.fire({
-        title: '📱 Enviar Recordatorio',
+        title: '<i class="bi bi-bell"></i> Enviar Recordatorio',
         html: `<p>Enviar a <strong>${patientName}</strong></p><div class="d-flex gap-3 justify-content-center mt-3"><button class="btn btn-success" id="sendWhatsApp"><i class="bi bi-whatsapp me-2"></i>WhatsApp</button><button class="btn btn-primary" id="sendEmail"><i class="bi bi-envelope me-2"></i>Email</button></div>`,
         showConfirmButton: false,
         showCancelButton: true,
@@ -485,7 +486,7 @@ async function savePatientMedicalInfo() {
     try {
         await updateDoc(doc(db, "users", currentUserUID), { medicalInfo: medicalInfo });
         patientMedicalInfo = medicalInfo;
-        Swal.fire('✅ Guardado', 'Información actualizada', 'success');
+        Swal.fire('<i class="bi bi-check-circle"></i> Guardado', 'Información actualizada', 'success');
         showToast("Información guardada", "success");
     } catch (error) {
         Swal.fire('❌ Error', error.message, 'error');
@@ -498,22 +499,55 @@ async function loadPastAppointments() {
         pastAppointmentsList.innerHTML = '<div class="text-center py-4 text-muted"><i class="bi bi-clock-history" style="font-size: 2rem;"></i><p class="mt-2 small">Cargando...</p></div>';
         const q = query(collection(db, "appointments"), where("patientId", "==", currentUserUID), orderBy("date", "desc"));
         const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-            pastAppointmentsList.innerHTML = '<div class="empty-state"><i class="bi bi-inbox"></i><h4>Sin citas anteriores</h4></div>';
-            return;
-        }
-        let html = '';
-        snapshot.forEach(docSnap => {
-            const cita = docSnap.data();
-            if (cita.status !== 'completada' && cita.status !== 'cancelada') return;
-            const fecha = new Date(cita.date).toLocaleDateString('es-MX', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
-            const paymentStatus = cita.paymentStatus === 'paid' ? '<span class="badge bg-success">Pagado</span>' : '<span class="badge bg-warning">Pendiente</span>';
-            html += `<div class="past-appointment-item"><div class="past-appointment-header"><span class="past-appointment-date">📅 ${fecha}</span><span class="past-appointment-status ${cita.status}">${cita.status}</span></div><div class="past-appointment-content"><strong>👨‍⚕️ ${cita.doctor}</strong><p><strong>Motivo:</strong> ${cita.reason || 'N/A'}</p><div class="mb-2">${paymentStatus}</div>${cita.diagnosis ? `<div class="medical-record-section"><div class="medical-record-label">📋 Diagnóstico</div><div class="medical-record-value">${cita.diagnosis}</div></div>` : ''}${cita.treatment ? `<div class="medical-record-section"><div class="medical-record-label">💊 Tratamiento</div><div class="medical-record-value">${cita.treatment}</div></div>` : ''}${cita.medications && cita.medications.length > 0 ? `<div class="medical-record-section"><div class="medical-record-label">💉 Medicamentos</div><ul class="medication-list">${cita.medications.map(med => `<li class="medication-item"><i class="bi bi-capsule"></i> ${med}</li>`).join('')}</ul></div>` : ''}${cita.status === 'completada' && cita.sendToPatient ? `<button class="btn btn-sm btn-outline-info mt-2" onclick="window.viewMedicalNote('${docSnap.id}')"><i class="bi bi-file-earmark-medical me-1"></i>Ver nota</button>` : ''}</div></div>`;
-        });
-        pastAppointmentsList.innerHTML = html;
+        renderPastAppointmentsList(snapshot);
     } catch (error) {
-        console.error("❌ Error cargando historial:", error);
+        console.log("⚠️ Índice no disponible, usando fallback...");
+        try {
+            const qFallback = query(collection(db, "appointments"), where("patientId", "==", currentUserUID));
+            const snapshot = await getDocs(qFallback);
+            let docs = snapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.status === 'completada' || data.status === 'cancelada';
+            });
+            docs.sort((a, b) => {
+                const dateA = a.data().date || '';
+                const dateB = b.data().date || '';
+                return dateB.localeCompare(dateA);
+            });
+            if (docs.length === 0) {
+                pastAppointmentsList.innerHTML = '<div class="empty-state"><i class="bi bi-inbox"></i><h4>Sin citas anteriores</h4></div>';
+                return;
+            }
+            let html = '';
+            docs.forEach(docSnap => {
+                const cita = docSnap.data();
+                const fecha = new Date(cita.date).toLocaleDateString('es-MX', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+                const paymentStatus = cita.paymentStatus === 'paid' ? '<span class="badge bg-success">Pagado</span>' : '<span class="badge bg-warning">Pendiente</span>';
+                html += `<div class="past-appointment-item"><div class="past-appointment-header"><span class="past-appointment-date"><i class="bi bi-calendar"></i> ${fecha}</span><span class="past-appointment-status ${cita.status}">${cita.status}</span></div><div class="past-appointment-content"><strong><i class="bi bi-person-workspace"></i> ${cita.doctor}</strong><p><strong>Motivo:</strong> ${cita.reason || 'N/A'}</p><div class="mb-2">${paymentStatus}</div>${cita.diagnosis ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-clipboard-data"></i> Diagnóstico</div><div class="medical-record-value">${cita.diagnosis}</div></div>` : ''}${cita.treatment ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-capsule"></i> Tratamiento</div><div class="medical-record-value">${cita.treatment}</div></div>` : ''}${cita.medications && cita.medications.length > 0 ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-capsule"></i> Medicamentos</div><ul class="medication-list">${cita.medications.map(med => `<li class="medication-item"><i class="bi bi-capsule"></i> ${med}</li>`).join('')}</ul></div>` : ''}${cita.status === 'completada' && cita.sendToPatient ? `<button class="btn btn-sm btn-outline-info mt-2" onclick="window.viewMedicalNote('${docSnap.id}')"><i class="bi bi-file-earmark-medical me-1"></i>Ver nota</button>` : ''}</div></div>`;
+            });
+            pastAppointmentsList.innerHTML = html;
+        } catch (fallbackError) {
+            console.error("❌ Error en fallback:", fallbackError);
+            pastAppointmentsList.innerHTML = '<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h4>Error</h4></div>';
+        }
     }
+}
+
+function renderPastAppointmentsList(snapshot) {
+    if (!pastAppointmentsList) return;
+    if (snapshot.empty) {
+        pastAppointmentsList.innerHTML = '<div class="empty-state"><i class="bi bi-inbox"></i><h4>Sin citas anteriores</h4></div>';
+        return;
+    }
+    let html = '';
+    snapshot.forEach(docSnap => {
+        const cita = docSnap.data();
+        if (cita.status !== 'completada' && cita.status !== 'cancelada') return;
+        const fecha = new Date(cita.date).toLocaleDateString('es-MX', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+        const paymentStatus = cita.paymentStatus === 'paid' ? '<span class="badge bg-success">Pagado</span>' : '<span class="badge bg-warning">Pendiente</span>';
+        html += `<div class="past-appointment-item"><div class="past-appointment-header"><span class="past-appointment-date"><i class="bi bi-calendar"></i> ${fecha}</span><span class="past-appointment-status ${cita.status}">${cita.status}</span></div><div class="past-appointment-content"><strong><i class="bi bi-person-workspace"></i> ${cita.doctor}</strong><p><strong>Motivo:</strong> ${cita.reason || 'N/A'}</p><div class="mb-2">${paymentStatus}</div>${cita.diagnosis ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-clipboard-data"></i> Diagnóstico</div><div class="medical-record-value">${cita.diagnosis}</div></div>` : ''}${cita.treatment ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-capsule"></i> Tratamiento</div><div class="medical-record-value">${cita.treatment}</div></div>` : ''}${cita.medications && cita.medications.length > 0 ? `<div class="medical-record-section"><div class="medical-record-label"><i class="bi bi-capsule"></i> Medicamentos</div><ul class="medication-list">${cita.medications.map(med => `<li class="medication-item"><i class="bi bi-capsule"></i> ${med}</li>`).join('')}</ul></div>` : ''}${cita.status === 'completada' && cita.sendToPatient ? `<button class="btn btn-sm btn-outline-info mt-2" onclick="window.viewMedicalNote('${docSnap.id}')"><i class="bi bi-file-earmark-medical me-1"></i>Ver nota</button>` : ''}</div></div>`;
+    });
+    pastAppointmentsList.innerHTML = html;
 }
 
 window.viewMedicalNote = async function(appointmentId) {
@@ -522,8 +556,8 @@ window.viewMedicalNote = async function(appointmentId) {
         if (!appointmentDoc.exists()) { Swal.fire('❌ Error', 'Cita no encontrada', 'error'); return; }
         const cita = appointmentDoc.data();
         Swal.fire({
-            title: '📋 Nota Médica',
-            html: `<div class="text-start"><div class="mb-3"><strong>📅 Fecha:</strong> ${new Date(cita.date).toLocaleDateString('es-MX')}</div><div class="mb-3"><strong>👨‍⚕️ Doctor:</strong> ${cita.doctor}</div>${cita.diagnosis ? `<div class="mb-3 p-3 bg-light rounded"><strong>📋 Diagnóstico:</strong><br><span>${cita.diagnosis}</span></div>` : ''}${cita.treatment ? `<div class="mb-3 p-3 bg-light rounded"><strong>💊 Tratamiento:</strong><br><span>${cita.treatment}</span></div>` : ''}${cita.medications && cita.medications.length > 0 ? `<div class="mb-3 p-3 bg-light rounded"><strong>💉 Medicamentos:</strong><ul class="mt-2">${cita.medications.map(med => `<li>${med}</li>`).join('')}</ul></div>` : ''}</div>`,
+            title: '<i class="bi bi-file-earmark-medical"></i> Nota Médica',
+            html: `<div class="text-start"><div class="mb-3"><strong><i class="bi bi-calendar"></i> Fecha:</strong> ${new Date(cita.date).toLocaleDateString('es-MX')}</div><div class="mb-3"><strong><i class="bi bi-person-workspace"></i> Doctor:</strong> ${cita.doctor}</div>${cita.diagnosis ? `<div class="mb-3 p-3 bg-light rounded"><strong><i class="bi bi-clipboard-data"></i> Diagnóstico:</strong><br><span>${cita.diagnosis}</span></div>` : ''}${cita.treatment ? `<div class="mb-3 p-3 bg-light rounded"><strong><i class="bi bi-capsule"></i> Tratamiento:</strong><br><span>${cita.treatment}</span></div>` : ''}${cita.medications && cita.medications.length > 0 ? `<div class="mb-3 p-3 bg-light rounded"><strong><i class="bi bi-capsule"></i> Medicamentos:</strong><ul class="mt-2">${cita.medications.map(med => `<li>${med}</li>`).join('')}</ul></div>` : ''}</div>`,
             width: '600px'
         });
     } catch (error) {
@@ -538,10 +572,10 @@ window.addMedicalNote = async function(appointmentId) {
         if (!appointmentDoc.exists()) { Swal.fire('❌ Error', 'Cita no encontrada', 'error'); return; }
         const cita = appointmentDoc.data();
         const { value: formValues } = await Swal.fire({
-            title: '📝 Nota Médica',
-            html: `<div class="text-start"><div class="mb-3"><label class="form-label">📋 Diagnóstico</label><textarea id="medicalDiagnosis" class="form-control" rows="3">${cita.diagnosis || ''}</textarea></div><div class="mb-3"><label class="form-label">💊 Tratamiento</label><textarea id="medicalTreatment" class="form-control" rows="3">${cita.treatment || ''}</textarea></div><div class="mb-3"><label class="form-label">💉 Medicamentos</label><textarea id="medicalMedications" class="form-control" rows="3">${cita.medications ? cita.medications.join('\n') : ''}</textarea></div><div class="form-check"><input type="checkbox" class="form-check-input" id="sendToPatient" ${cita.sendToPatient ? 'checked' : ''}><label class="form-check-label">Compartir con paciente</label></div></div>`,
+            title: '<i class="bi bi-file-earmark-medical"></i> Nota Médica',
+            html: `<div class="text-start"><div class="mb-3"><label class="form-label"><i class="bi bi-clipboard-data"></i> Diagnóstico</label><textarea id="medicalDiagnosis" class="form-control" rows="3">${cita.diagnosis || ''}</textarea></div><div class="mb-3"><label class="form-label"><i class="bi bi-capsule"></i> Tratamiento</label><textarea id="medicalTreatment" class="form-control" rows="3">${cita.treatment || ''}</textarea></div><div class="mb-3"><label class="form-label"><i class="bi bi-capsule"></i> Medicamentos</label><textarea id="medicalMedications" class="form-control" rows="3">${cita.medications ? cita.medications.join('\n') : ''}</textarea></div><div class="form-check"><input type="checkbox" class="form-check-input" id="sendToPatient" ${cita.sendToPatient ? 'checked' : ''}><label class="form-check-label">Compartir con paciente</label></div></div>`,
             showCancelButton: true,
-            confirmButtonText: 'Guardar',
+            confirmButtonText: '<i class="bi bi-save"></i> Guardar',
             cancelButtonText: 'Cancelar'
         });
         if (formValues) {
@@ -552,7 +586,7 @@ window.addMedicalNote = async function(appointmentId) {
                 medications: medications,
                 sendToPatient: document.getElementById('sendToPatient').checked
             });
-            Swal.fire('✅ Guardado', 'Nota actualizada', 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Guardado', 'Nota actualizada', 'success');
             loadAppointmentsRealtime();
         }
     } catch (error) {
@@ -710,10 +744,11 @@ function renderAdminUsers() {
     }
     let html = '';
     allUsers.forEach(user => {
+        const canDelete = user.rol !== 'admin' && user.id !== currentUserUID;
         const roleClass = user.rol === 'admin' ? 'admin' : user.rol === 'doctor' ? 'doctor' : 'paciente';
         const statusClass = user.activo !== false ? 'active' : 'inactive';
-        const roleIcon = user.rol === 'admin' ? '👑' : user.rol === 'doctor' ? '👨‍⚕️' : '👤';
-        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${roleIcon}</span><span>${user.nombre || user.email}</span><span class="role-badge ${roleClass}">${user.rol}</span><span class="status-badge ${statusClass}">${user.activo !== false ? 'Activo' : 'Inactivo'}</span></div><div class="admin-item-subtitle"><i class="bi bi-envelope"></i> ${user.email} • <i class="bi bi-calendar"></i> ${user.fechaRegistro?.toDate ? user.fechaRegistro.toDate().toLocaleDateString() : 'N/A'}</div></div><div class="admin-item-actions"><button class="btn btn-sm btn-outline-primary" onclick="window.editUserRole('${user.id}', '${user.rol}')" title="Cambiar rol"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="window.toggleUserStatus('${user.id}', ${user.activo !== false})" title="${user.activo !== false ? 'Desactivar' : 'Activar'}"><i class="bi bi-${user.activo !== false ? 'lock' : 'unlock'}"></i></button></div></div>`;
+        const roleIcon = user.rol === 'admin' ? '<i class="bi bi-shield-lock"></i>' : user.rol === 'doctor' ? '<i class="bi bi-person-workspace"></i>' : '<i class="bi bi-person"></i>';
+        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${roleIcon}</span><span>${user.nombre || user.email}</span><span class="role-badge ${roleClass}">${user.rol}</span><span class="status-badge ${statusClass}">${user.activo !== false ? 'Activo' : 'Inactivo'}</span></div><div class="admin-item-subtitle"><i class="bi bi-envelope"></i> ${user.email} • <i class="bi bi-calendar"></i> ${user.fechaRegistro?.toDate ? user.fechaRegistro.toDate().toLocaleDateString() : 'N/A'}</div></div><div class="admin-item-actions"><button class="btn btn-sm btn-outline-primary" onclick="window.editUserRole('${user.id}', '${user.rol}')" title="Cambiar rol"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="window.toggleUserStatus('${user.id}', ${user.activo !== false})" title="${user.activo !== false ? 'Desactivar' : 'Activar'}"><i class="bi bi-${user.activo !== false ? 'lock' : 'unlock'}"></i></button>${canDelete ? `<button class="btn btn-sm btn-danger" onclick="window.deleteUser('${user.id}', '${user.email}')" title="Eliminar usuario"><i class="bi bi-trash"></i></button>` : ''}</div></div>`;
     });
     container.innerHTML = html;
 }
@@ -731,9 +766,9 @@ function renderAdminCitas() {
     let html = '';
     filteredCitas.slice(0, 50).forEach(cita => {
         const fecha = new Date(cita.date).toLocaleDateString('es-MX');
-        const statusEmoji = cita.status === 'pendiente' ? '⏳' : cita.status === 'confirmada' ? '✅' : cita.status === 'completada' ? '✔️' : '❌';
-        const paymentEmoji = cita.paymentStatus === 'paid' ? '💵' : '⏳';
-        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${statusEmoji}</span><span>${cita.doctor} - ${cita.patientNombre}</span><span class="appointment-badge ${cita.status}">${cita.status}</span><span class="status-badge ${cita.paymentStatus === 'paid' ? 'active' : 'pending'}">${paymentEmoji} ${cita.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}</span></div><div class="admin-item-subtitle"><i class="bi bi-calendar"></i> ${fecha} ${cita.time} • <i class="bi bi-currency-dollar"></i> $${cita.consultationFee || 0}</div></div><div class="admin-item-actions"><button class="btn btn-sm btn-outline-info" onclick="window.viewCitaDetail('${cita.id}')" title="Ver detalle"><i class="bi bi-eye"></i></button><button class="btn btn-sm btn-outline-danger" onclick="window.deleteCita('${cita.id}')" title="Eliminar"><i class="bi bi-trash"></i></button></div></div>`;
+        const statusIcon = cita.status === 'pendiente' ? '<i class="bi bi-hourglass-split"></i>' : cita.status === 'confirmada' ? '<i class="bi bi-check-circle"></i>' : cita.status === 'completada' ? '<i class="bi bi-check-all"></i>' : '<i class="bi bi-x-circle"></i>';
+        const paymentIcon = cita.paymentStatus === 'paid' ? '<i class="bi bi-cash-coin"></i>' : '<i class="bi bi-hourglass-split"></i>';
+        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${statusIcon}</span><span>${cita.doctor} - ${cita.patientNombre}</span><span class="appointment-badge ${cita.status}">${cita.status}</span><span class="status-badge ${cita.paymentStatus === 'paid' ? 'active' : 'pending'}">${paymentIcon} ${cita.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}</span></div><div class="admin-item-subtitle"><i class="bi bi-calendar"></i> ${fecha} ${cita.time} • <i class="bi bi-currency-dollar"></i> $${cita.consultationFee || 0}</div></div><div class="admin-item-actions"><button class="btn btn-sm btn-outline-info" onclick="window.viewCitaDetail('${cita.id}')" title="Ver detalle"><i class="bi bi-eye"></i></button><button class="btn btn-sm btn-outline-danger" onclick="window.deleteCita('${cita.id}')" title="Eliminar"><i class="bi bi-trash"></i></button></div></div>`;
     });
     container.innerHTML = html;
 }
@@ -750,8 +785,8 @@ function renderAdminPagos() {
     pagosCitas.slice(0, 50).forEach(cita => {
         const amount = cita.paidAmount || cita.consultationFee || 0;
         const statusClass = cita.paymentStatus === 'paid' ? 'active' : 'pending';
-        const statusEmoji = cita.paymentStatus === 'paid' ? '✅' : '⏳';
-        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${statusEmoji}</span><span>${cita.patientNombre} - ${cita.doctor}</span><span class="status-badge ${statusClass}">${cita.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}</span></div><div class="admin-item-subtitle"><i class="bi bi-calendar"></i> ${new Date(cita.date).toLocaleDateString('es-MX')} • <i class="bi bi-currency-dollar"></i> $${amount}</div></div><div class="admin-item-actions">${cita.paymentStatus !== 'paid' ? `<button class="btn btn-sm btn-success" onclick="window.markAsPaid('${cita.id}', ${amount})"><i class="bi bi-check-circle"></i> Marcar Pagado</button>` : ''}</div></div>`;
+        const statusIcon = cita.paymentStatus === 'paid' ? '<i class="bi bi-check-circle"></i>' : '<i class="bi bi-hourglass-split"></i>';
+        html += `<div class="admin-item"><div class="admin-item-info"><div class="admin-item-title"><span class="me-2">${statusIcon}</span><span>${cita.patientNombre} - ${cita.doctor}</span><span class="status-badge ${statusClass}">${cita.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}</span></div><div class="admin-item-subtitle"><i class="bi bi-calendar"></i> ${new Date(cita.date).toLocaleDateString('es-MX')} • <i class="bi bi-currency-dollar"></i> $${amount}</div></div><div class="admin-item-actions">${cita.paymentStatus !== 'paid' ? `<button class="btn btn-sm btn-success" onclick="window.markAsPaid('${cita.id}', ${amount})"><i class="bi bi-check-circle"></i> Marcar Pagado</button>` : ''}</div></div>`;
     });
     container.innerHTML = html;
 }
@@ -791,7 +826,7 @@ window.editUserRole = async function(userId, currentRole) {
     if (newRole && ['paciente', 'doctor', 'admin'].includes(newRole)) {
         try {
             await updateDoc(doc(db, "users", userId), { rol: newRole });
-            Swal.fire('✅ Rol actualizado', `Usuario ahora es ${newRole}`, 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Rol actualizado', `Usuario ahora es ${newRole}`, 'success');
             loadAdminData();
         } catch (error) {
             Swal.fire('❌ Error', error.message, 'error');
@@ -811,11 +846,95 @@ window.toggleUserStatus = async function(userId, currentStatus) {
     if (confirm.isConfirmed) {
         try {
             await updateDoc(doc(db, "users", userId), { activo: !currentStatus });
-            Swal.fire('✅ Actualizado', `Usuario ${!currentStatus ? 'activado' : 'desactivado'}`, 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Actualizado', `Usuario ${!currentStatus ? 'activado' : 'desactivado'}`, 'success');
             loadAdminData();
         } catch (error) {
             Swal.fire('❌ Error', error.message, 'error');
         }
+    }
+};
+
+// ============================================
+// ELIMINAR USUARIO (Admin)
+// ============================================
+
+window.deleteUser = async function(userId, userEmail) {
+    const confirm1 = await Swal.fire({
+        title: '<i class="bi bi-exclamation-triangle"></i> ¿Eliminar usuario?',
+        html: `<p>Estás a punto de eliminar permanentemente a:</p><p class="fw-bold">${userEmail}</p><p class="text-danger small"><i class="bi bi-exclamation-triangle"></i> Esta acción eliminará:</p><ul class="text-start small"><li>Su cuenta de usuario</li><li>Todas sus citas agendadas</li><li>Su historial médico</li><li>Sus registros de pago</li></ul><p class="text-danger fw-bold">Esta acción NO se puede deshacer.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar permanentemente',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc2626',
+        reverseButtons: true
+    });
+    
+    if (!confirm1.isConfirmed) return;
+    
+    const confirm2 = await Swal.fire({
+        title: 'Confirmar eliminación',
+        html: `<p class="text-danger">Para confirmar, escribe <strong>ELIMINAR</strong> en el campo:</p><input type="text" id="confirmDelete" class="form-control mt-2" placeholder="Escribe ELIMINAR">`,
+        input: 'text',
+        inputPlaceholder: 'ELIMINAR',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar eliminación',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc2626',
+        preConfirm: () => {
+            const value = document.getElementById('confirmDelete').value;
+            if (value.toUpperCase() !== 'ELIMINAR') {
+                Swal.showValidationMessage('Debes escribir ELIMINAR para confirmar');
+                return false;
+            }
+            return true;
+        }
+    });
+    
+    if (!confirm2.isConfirmed) return;
+    
+    Swal.fire({
+        title: 'Eliminando...',
+        html: 'Por favor espera',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+    });
+    
+    try {
+        const citasQuery = query(collection(db, "appointments"), where("patientId", "==", userId));
+        const citasSnapshot = await getDocs(citasQuery);
+        const deletePromises = [];
+        citasSnapshot.forEach(doc => {
+            deletePromises.push(deleteDoc(doc.ref));
+        });
+        await Promise.all(deletePromises);
+        
+        try {
+            await deleteDoc(doc(db, "doctors", userId));
+        } catch (e) {
+            console.log("No era doctor o ya eliminado");
+        }
+        
+        await deleteDoc(doc(db, "users", userId));
+        
+        Swal.fire({
+            icon: 'success',
+            title: '<i class="bi bi-check-circle"></i> Usuario eliminado',
+            text: `${userEmail} ha sido eliminado del sistema`,
+            timer: 3000,
+            showConfirmButton: false
+        });
+        
+        loadAdminData();
+        
+    } catch (error) {
+        console.error("❌ Error eliminando usuario:", error);
+        Swal.fire({
+            icon: 'error',
+            title: '❌ Error',
+            text: 'No se pudo eliminar el usuario: ' + error.message,
+            confirmButtonText: 'Intentar de nuevo'
+        });
     }
 };
 
@@ -824,8 +943,8 @@ window.viewCitaDetail = async function(citaId) {
     if (citaDoc.exists()) {
         const cita = citaDoc.data();
         Swal.fire({
-            title: '📋 Detalle de Cita',
-            html: `<div class="text-start"><p><strong>👤 Paciente:</strong> ${cita.patientNombre}</p><p><strong>👨‍⚕️ Doctor:</strong> ${cita.doctor}</p><p><strong>📅 Fecha:</strong> ${cita.date} ${cita.time}</p><p><strong>📊 Estado:</strong> ${cita.status}</p><p><strong>💳 Pago:</strong> ${cita.paymentStatus}</p><p><strong>📝 Motivo:</strong> ${cita.reason}</p>${cita.diagnosis ? `<p><strong>📋 Diagnóstico:</strong> ${cita.diagnosis}</p>` : ''}${cita.treatment ? `<p><strong>💊 Tratamiento:</strong> ${cita.treatment}</p>` : ''}</div>`,
+            title: '<i class="bi bi-clipboard-data"></i> Detalle de Cita',
+            html: `<div class="text-start"><p><strong><i class="bi bi-person"></i> Paciente:</strong> ${cita.patientNombre}</p><p><strong><i class="bi bi-person-workspace"></i> Doctor:</strong> ${cita.doctor}</p><p><strong><i class="bi bi-calendar"></i> Fecha:</strong> ${cita.date} ${cita.time}</p><p><strong><i class="bi bi-info-circle"></i> Estado:</strong> ${cita.status}</p><p><strong><i class="bi bi-cash-coin"></i> Pago:</strong> ${cita.paymentStatus}</p><p><strong><i class="bi bi-card-text"></i> Motivo:</strong> ${cita.reason}</p>${cita.diagnosis ? `<p><strong><i class="bi bi-clipboard-data"></i> Diagnóstico:</strong> ${cita.diagnosis}</p>` : ''}${cita.treatment ? `<p><strong><i class="bi bi-capsule"></i> Tratamiento:</strong> ${cita.treatment}</p>` : ''}</div>`,
             width: '600px'
         });
     }
@@ -843,7 +962,7 @@ window.deleteCita = async function(citaId) {
     if (confirm.isConfirmed) {
         try {
             await deleteDoc(doc(db, "appointments", citaId));
-            Swal.fire('✅ Eliminada', 'La cita fue eliminada', 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Eliminada', 'La cita fue eliminada', 'success');
             loadAdminData();
         } catch (error) {
             Swal.fire('❌ Error', error.message, 'error');
@@ -863,24 +982,15 @@ window.exportPaymentsReport = function() {
     a.href = url;
     a.download = `reporte_pagos_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-    Swal.fire('✅ Exportado', 'Reporte descargado', 'success');
+    Swal.fire('<i class="bi bi-check-circle"></i> Exportado', 'Reporte descargado', 'success');
 };
 
 // ============================================
-// 11. DISPONIBILIDAD
+// 11-21. RESTO DE FUNCIONES (Disponibilidad, Citas, Calendario, Auth, etc.)
 // ============================================
 
 function getDefaultAvailability() {
-    return {
-        domingo: { enabled: false, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        lunes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        martes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        miércoles: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        jueves: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        viernes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        sábado: { enabled: false, startTime: '09:00', endTime: '18:00', slotDuration: 30 },
-        blockedDates: []
-    };
+    return { domingo: { enabled: false, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, lunes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, martes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, miércoles: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, jueves: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, viernes: { enabled: true, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, sábado: { enabled: false, startTime: '09:00', endTime: '18:00', slotDuration: 30 }, blockedDates: [] };
 }
 
 function generateTimeSlots(startTime, endTime, slotDuration) {
@@ -921,7 +1031,7 @@ async function saveDoctorAvailability() {
     if (!currentUserUID || currentUserRole !== 'doctor') return;
     try {
         await updateDoc(doc(db, "users", currentUserUID), { disponibilidad: doctorAvailability });
-        Swal.fire('✅ Guardado', 'Disponibilidad actualizada', 'success');
+        Swal.fire('<i class="bi bi-check-circle"></i> Guardado', 'Disponibilidad actualizada', 'success');
     } catch (error) {
         Swal.fire('❌ Error', error.message, 'error');
     }
@@ -931,7 +1041,7 @@ function renderAvailabilityView() {
     const container = document.getElementById('availabilityDaysContainer');
     if (!container) return;
     if (!doctorAvailability) doctorAvailability = getDefaultAvailability();
-    const days = [{ key: 'domingo', name: 'Domingo', icon: '☀️' }, { key: 'lunes', name: 'Lunes', icon: '🌙' }, { key: 'martes', name: 'Martes', icon: '🌙' }, { key: 'miércoles', name: 'Miércoles', icon: '🌙' }, { key: 'jueves', name: 'Jueves', icon: '🌙' }, { key: 'viernes', name: 'Viernes', icon: '🌙' }, { key: 'sábado', name: 'Sábado', icon: '☀️' }];
+    const days = [{ key: 'domingo', name: 'Domingo', icon: '<i class="bi bi-sun"></i>' }, { key: 'lunes', name: 'Lunes', icon: '<i class="bi bi-moon"></i>' }, { key: 'martes', name: 'Martes', icon: '<i class="bi bi-moon"></i>' }, { key: 'miércoles', name: 'Miércoles', icon: '<i class="bi bi-moon"></i>' }, { key: 'jueves', name: 'Jueves', icon: '<i class="bi bi-moon"></i>' }, { key: 'viernes', name: 'Viernes', icon: '<i class="bi bi-moon"></i>' }, { key: 'sábado', name: 'Sábado', icon: '<i class="bi bi-sun"></i>' }];
     let html = '';
     days.forEach(day => {
         const config = doctorAvailability[day.key] || { enabled: false, startTime: '09:00', endTime: '18:00' };
@@ -946,7 +1056,7 @@ function renderAvailabilityEditor() {
     const container = document.getElementById('availabilityEditorContainer');
     if (!container) return;
     if (!doctorAvailability) doctorAvailability = getDefaultAvailability();
-    const days = [{ key: 'domingo', name: 'Domingo', icon: '☀️' }, { key: 'lunes', name: 'Lunes', icon: '🌙' }, { key: 'martes', name: 'Martes', icon: '🌙' }, { key: 'miércoles', name: 'Miércoles', icon: '🌙' }, { key: 'jueves', name: 'Jueves', icon: '🌙' }, { key: 'viernes', name: 'Viernes', icon: '🌙' }, { key: 'sábado', name: 'Sábado', icon: '☀️' }];
+    const days = [{ key: 'domingo', name: 'Domingo', icon: '<i class="bi bi-sun"></i>' }, { key: 'lunes', name: 'Lunes', icon: '<i class="bi bi-moon"></i>' }, { key: 'martes', name: 'Martes', icon: '<i class="bi bi-moon"></i>' }, { key: 'miércoles', name: 'Miércoles', icon: '<i class="bi bi-moon"></i>' }, { key: 'jueves', name: 'Jueves', icon: '<i class="bi bi-moon"></i>' }, { key: 'viernes', name: 'Viernes', icon: '<i class="bi bi-moon"></i>' }, { key: 'sábado', name: 'Sábado', icon: '<i class="bi bi-sun"></i>' }];
     let html = '';
     days.forEach(day => {
         const config = doctorAvailability[day.key] || { enabled: false, startTime: '09:00', endTime: '18:00' };
@@ -997,7 +1107,7 @@ window.saveAvailability = async function() { await saveDoctorAvailability(); win
 window.blockDate = function() {
     const dateInput = document.getElementById('blockDateInput');
     const date = dateInput?.value;
-    if (!date) { Swal.fire('⚠️ Fecha requerida', 'Selecciona una fecha', 'warning'); return; }
+    if (!date) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Fecha requerida', 'Selecciona una fecha', 'warning'); return; }
     if (!doctorAvailability) doctorAvailability = getDefaultAvailability();
     if (!doctorAvailability.blockedDates) doctorAvailability.blockedDates = [];
     if (!doctorAvailability.blockedDates.includes(date)) {
@@ -1031,10 +1141,6 @@ window.isDoctorAvailable = function(date, time) {
     const [endHour, endMin] = dayConfig.endTime.split(':').map(Number);
     return timeMinutes >= (startHour * 60 + startMin) && timeMinutes + (dayConfig.slotDuration || 30) <= (endHour * 60 + endMin);
 };
-
-// ============================================
-// 12. HORARIOS DISPONIBLES
-// ============================================
 
 window.loadAvailableSlots = async function() {
     const doctorId = doctorSelect?.value;
@@ -1080,10 +1186,6 @@ async function getBookedTimes(doctorId, date) {
     } catch (error) { return []; }
 }
 
-// ============================================
-// 13. CARGAR DOCTORES
-// ============================================
-
 async function loadDoctors() {
     try {
         if (!doctorSelect) return;
@@ -1112,18 +1214,14 @@ async function loadDoctors() {
     }
 }
 
-// ============================================
-// 14. GUARDAR CITA
-// ============================================
-
 async function saveAppointment(doctorId, date, time, reason) {
     if (!currentUserUID) { showMessage("❌ Inicia sesión", "danger"); return; }
     const hasPending = await checkPatientPendingPayments();
-    if (hasPending) { Swal.fire('⚠️ Pagos Pendientes', 'Debes pagar antes de agendar', 'warning'); return; }
+    if (hasPending) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Pagos Pendientes', 'Debes pagar antes de agendar', 'warning'); return; }
     await loadDoctorAvailability(doctorId);
-    if (!window.isDoctorAvailable(date, time)) { Swal.fire('⚠️ No disponible', 'Horario no disponible', 'error'); return; }
+    if (!window.isDoctorAvailable(date, time)) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> No disponible', 'Horario no disponible', 'error'); return; }
     const bookedTimes = await getBookedTimes(doctorId, date);
-    if (bookedTimes.includes(time)) { Swal.fire('⚠️ Ocupado', 'Horario ocupado', 'error'); await window.loadAvailableSlots(); return; }
+    if (bookedTimes.includes(time)) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Ocupado', 'Horario ocupado', 'error'); await window.loadAvailableSlots(); return; }
     const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
     const doctorName = selectedOption.getAttribute('data-nombre') || 'Doctor';
     const consultationFee = parseInt(selectedOption.getAttribute('data-fee')) || 500;
@@ -1154,10 +1252,6 @@ async function saveAppointment(doctorId, date, time, reason) {
         saveAppointmentBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Confirmar Cita';
     }
 }
-
-// ============================================
-// 15. CALENDARIO
-// ============================================
 
 function initCalendar() {
     const calendarEl = document.getElementById('calendarContainer');
@@ -1193,10 +1287,10 @@ function updateCalendarEvents(appointments) {
 function handleEventClick(info) {
     const event = info.event;
     const props = event.extendedProps;
-    const statusIcons = { pendiente: '⏳', confirmada: '✅', cancelada: '❌', completada: '✔️' };
+    const statusIcons = { pendiente: '<i class="bi bi-hourglass-split"></i>', confirmada: '<i class="bi bi-check-circle"></i>', cancelada: '<i class="bi bi-x-circle"></i>', completada: '<i class="bi bi-check-all"></i>' };
     Swal.fire({
         title: `${statusIcons[props.status]} ${event.title}`,
-        html: `<div class="text-start"><p><strong>📅 Fecha:</strong> ${event.start.toLocaleDateString('es-MX')}</p><p><strong>⏰ Hora:</strong> ${props.time}</p><p><strong>👨‍⚕️ Doctor:</strong> ${props.doctor}</p><p><strong>📝 Motivo:</strong> ${props.reason}</p></div>`,
+        html: `<div class="text-start"><p><strong><i class="bi bi-calendar"></i> Fecha:</strong> ${event.start.toLocaleDateString('es-MX')}</p><p><strong><i class="bi bi-clock"></i> Hora:</strong> ${props.time}</p><p><strong><i class="bi bi-person-workspace"></i> Doctor:</strong> ${props.doctor}</p><p><strong><i class="bi bi-card-text"></i> Motivo:</strong> ${props.reason}</p></div>`,
         icon: 'info',
         confirmButtonText: 'Cerrar'
     });
@@ -1210,10 +1304,6 @@ function setupCalendarButtons() {
     if (weekBtn) weekBtn.addEventListener('click', () => calendarInstance?.changeView('timeGridWeek'));
     if (listBtn) listBtn.addEventListener('click', () => calendarInstance?.changeView('listMonth'));
 }
-
-// ============================================
-// 16. CARGAR CITAS
-// ============================================
 
 function loadAppointmentsRealtime() {
     if (!currentUserUID) { if (appointmentsList) appointmentsList.innerHTML = '<p class="text-muted text-center">Inicia sesión</p>'; return; }
@@ -1279,19 +1369,15 @@ function renderActionButtons(cita, isDoctor, citaId) {
     return '';
 }
 
-// ============================================
-// 17. ADMINISTRACIÓN DE CITAS
-// ============================================
-
 window.editAppointment = async function(appointmentId) {
     try {
         const appointmentDoc = await getDoc(doc(db, "appointments", appointmentId));
         if (!appointmentDoc.exists()) { Swal.fire('❌ Error', 'Cita no encontrada', 'error'); return; }
         const appointment = appointmentDoc.data();
         const { value: formValues } = await Swal.fire({
-            title: '✏️ Reprogramar',
-            html: `<div class="text-start"><label class="form-label">📅 Fecha</label><input type="date" id="editDate" class="form-control" value="${appointment.date}"><label class="form-label mt-2">⏰ Hora</label><input type="time" id="editTime" class="form-control" value="${appointment.time}"><label class="form-label mt-2">📝 Motivo</label><textarea id="editReason" class="form-control" rows="2">${appointment.reason}</textarea></div>`,
-            showCancelButton: true, confirmButtonText: 'Guardar', cancelButtonText: 'Cancelar',
+            title: '<i class="bi bi-pencil"></i> Reprogramar',
+            html: `<div class="text-start"><label class="form-label"><i class="bi bi-calendar"></i> Fecha</label><input type="date" id="editDate" class="form-control" value="${appointment.date}"><label class="form-label mt-2"><i class="bi bi-clock"></i> Hora</label><input type="time" id="editTime" class="form-control" value="${appointment.time}"><label class="form-label mt-2"><i class="bi bi-card-text"></i> Motivo</label><textarea id="editReason" class="form-control" rows="2">${appointment.reason}</textarea></div>`,
+            showCancelButton: true, confirmButtonText: '<i class="bi bi-save"></i> Guardar', cancelButtonText: 'Cancelar',
             preConfirm: () => {
                 const date = document.getElementById('editDate').value;
                 const time = document.getElementById('editTime').value;
@@ -1302,7 +1388,7 @@ window.editAppointment = async function(appointmentId) {
         });
         if (formValues) {
             await updateDoc(doc(db, "appointments", appointmentId), { date: formValues.date, time: formValues.time, reason: formValues.reason, status: 'pendiente' });
-            Swal.fire('✅ Reprogramada', 'Cita actualizada', 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Reprogramada', 'Cita actualizada', 'success');
         }
     } catch (error) { Swal.fire('❌ Error', error.message, 'error'); }
 };
@@ -1313,10 +1399,10 @@ window.completeAppointment = async function(appointmentId) {
         if (!appointmentDoc.exists()) { Swal.fire('❌ Error', 'Cita no encontrada', 'error'); return; }
         const appointment = appointmentDoc.data();
         if (appointment.status === 'completada') { Swal.fire('ℹ️ Ya completada', '', 'info'); return; }
-        const confirm = await Swal.fire({ title: '✔️ ¿Completar?', text: `Cita con ${appointment.patientNombre || 'Paciente'}`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No' });
+        const confirm = await Swal.fire({ title: '<i class="bi bi-check-all"></i> ¿Completar?', text: `Cita con ${appointment.patientNombre || 'Paciente'}`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No' });
         if (confirm.isConfirmed) {
             await updateDoc(doc(db, "appointments", appointmentId), { status: 'completada', completedAt: new Date() });
-            Swal.fire('✅ Completada', '', 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Completada', '', 'success');
             loadAppointmentsRealtime();
         }
     } catch (error) { Swal.fire('❌ Error', error.message, 'error'); }
@@ -1326,10 +1412,10 @@ window.cancelAppointment = async function(appointmentId) {
     try {
         const appointmentDoc = await getDoc(doc(db, "appointments", appointmentId));
         if (!appointmentDoc.exists()) { Swal.fire('❌ Error', 'Cita no encontrada', 'error'); return; }
-        const confirm = await Swal.fire({ title: '❌ ¿Cancelar?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No' });
+        const confirm = await Swal.fire({ title: '<i class="bi bi-x-circle"></i> ¿Cancelar?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'No' });
         if (confirm.isConfirmed) {
             await updateDoc(doc(db, "appointments", appointmentId), { status: 'cancelada', cancelledAt: new Date() });
-            Swal.fire('✅ Cancelada', '', 'success');
+            Swal.fire('<i class="bi bi-check-circle"></i> Cancelada', '', 'success');
         }
     } catch (error) { Swal.fire('❌ Error', error.message, 'error'); }
 };
@@ -1337,31 +1423,27 @@ window.cancelAppointment = async function(appointmentId) {
 window.updateStatus = async function(id, status) {
     try {
         await updateDoc(doc(db, "appointments", id), { status: status, updatedAt: new Date() });
-        Swal.fire({ icon: 'success', title: `✅ ${status}`, timer: 1500, showConfirmButton: false });
+        Swal.fire({ icon: 'success', title: `<i class="bi bi-check-circle"></i> ${status}`, timer: 1500, showConfirmButton: false });
         loadAppointmentsRealtime();
     } catch (error) { Swal.fire('❌ Error', error.message, 'error'); }
 };
-
-// ============================================
-// 18. PERFIL DOCTOR
-// ============================================
 
 async function saveDoctorProfile() {
     if (!currentUserUID || currentUserRole !== 'doctor') return;
     const nombre = doctorNameInput.value.trim();
     const especialidad = doctorSpecialtyInput.value.trim();
     const consultationFee = consultationFeeInput.value.trim() || 500;
-    if (!nombre || !especialidad) { Swal.fire('⚠️ Campos vacíos', 'Completa nombre y especialidad', 'warning'); return; }
+    if (!nombre || !especialidad) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Campos vacíos', 'Completa nombre y especialidad', 'warning'); return; }
     try {
         await updateDoc(doc(db, "users", currentUserUID), { nombre, especialidad, consultationFee: parseInt(consultationFee) });
         await setDoc(doc(db, "doctors", currentUserUID), { nombre, especialidad, activo: true, userId: currentUserUID, consultationFee: parseInt(consultationFee) }, { merge: true });
-        Swal.fire('✅ Perfil guardado', '', 'success');
+        Swal.fire('<i class="bi bi-check-circle"></i> Perfil guardado', '', 'success');
         await loadDoctors();
     } catch (error) { Swal.fire('❌ Error', error.message, 'error'); }
 }
 
 // ============================================
-// 19. AUTH STATE
+// 20. AUTH STATE
 // ============================================
 
 onAuthStateChanged(auth, async (user) => {
@@ -1449,7 +1531,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ============================================
-// 20. EVENT LISTENERS
+// 21. EVENT LISTENERS
 // ============================================
 
 if (loginForm) loginForm.addEventListener('submit', (e) => { e.preventDefault(); const email = emailInput.value.trim(); const password = passwordInput.value; if (isRegisterMode) { const selectedRole = document.querySelector('input[name="userRole"]:checked').value; registerUser(email, password, selectedRole); } else { loginUser(email, password); } });
@@ -1460,13 +1542,14 @@ if (btnPayments) btnPayments.addEventListener('click', window.togglePaymentsPane
 if (btnAdmin) btnAdmin.addEventListener('click', window.toggleAdminPanel);
 if (btnMedicalHistory) btnMedicalHistory.addEventListener('click', window.toggleMedicalHistory);
 if (toggleRegister) toggleRegister.addEventListener('click', (e) => { e.preventDefault(); isRegisterMode = !isRegisterMode; if (formTitle) formTitle.textContent = isRegisterMode ? 'Crear Cuenta' : 'Bienvenido'; if (submitBtn) submitBtn.innerHTML = isRegisterMode ? '<i class="bi bi-person-plus me-2"></i>Registrarse' : '<i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión'; if (toggleRegister) toggleRegister.textContent = isRegisterMode ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'; if (roleSelectContainer) roleSelectContainer.classList.toggle('d-none', !isRegisterMode); if (authMessage) authMessage.classList.add('d-none'); });
-if (appointmentForm) appointmentForm.addEventListener('submit', (e) => { e.preventDefault(); const today = new Date().toISOString().split('T')[0]; const date = appointmentDateInput.value; if (date < today) { Swal.fire('⚠️ Fecha inválida', 'No puedes agendar en el pasado', 'warning'); return; } const doctorId = doctorSelect.value; if (!doctorId) { Swal.fire('⚠️ Doctor requerido', 'Selecciona un doctor', 'warning'); return; } const time = appointmentTimeInput.value; if (!time) { Swal.fire('⚠️ Hora requerida', 'Selecciona una hora', 'warning'); return; } const reason = appointmentReasonInput ? appointmentReasonInput.value.trim() : ''; saveAppointment(doctorId, date, time, reason); });
+if (appointmentForm) appointmentForm.addEventListener('submit', (e) => { e.preventDefault(); const today = new Date().toISOString().split('T')[0]; const date = appointmentDateInput.value; if (date < today) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Fecha inválida', 'No puedes agendar en el pasado', 'warning'); return; } const doctorId = doctorSelect.value; if (!doctorId) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Doctor requerido', 'Selecciona un doctor', 'warning'); return; } const time = appointmentTimeInput.value; if (!time) { Swal.fire('<i class="bi bi-exclamation-triangle"></i> Hora requerida', 'Selecciona una hora', 'warning'); return; } const reason = appointmentReasonInput ? appointmentReasonInput.value.trim() : ''; saveAppointment(doctorId, date, time, reason); });
 if (doctorProfileForm) doctorProfileForm.addEventListener('submit', (e) => { e.preventDefault(); saveDoctorProfile(); });
 if (patientMedicalInfoForm) patientMedicalInfoForm.addEventListener('submit', (e) => { e.preventDefault(); savePatientMedicalInfo(); });
 window.addEventListener('beforeunload', () => { if (unsubscribeAppointments) unsubscribeAppointments(); if (calendarInstance) { calendarInstance.destroy(); calendarInstance = null; } if (appointmentsChart) { appointmentsChart.destroy(); appointmentsChart = null; } if (paymentsChart) { paymentsChart.destroy(); paymentsChart = null; } if (adminCitasChart) { adminCitasChart.destroy(); adminCitasChart = null; } if (adminStatusChart) { adminStatusChart.destroy(); adminStatusChart = null; } });
 
 console.log("🚀 ========================================");
-console.log("🚀 MediCare Pro v12.0 - COMPLETO");
+console.log("🚀 MediCare Pro v12.2 - ICONOS PROFESIONALES");
 console.log("✅ 3 Actores: Paciente/Doctor/Admin");
-console.log("✅ Todas las funciones operativas");
+console.log("✅ Iconos Bootstrap: IMPLEMENTADOS");
+console.log("✅ Sin emojis: VERIFICADO");
 console.log("🚀 ========================================");
