@@ -1454,3 +1454,146 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     background: var(--primary-light);
     color: white;
 }
+
+/* ============================================
+   TOUR DE BIENVENIDA
+   ============================================ */
+
+.tour-highlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.tour-highlight-element {
+    position: relative;
+    z-index: 9999;
+    box-shadow: 0 0 0 4px var(--primary-light), 0 0 40px rgba(14, 165, 233, 0.5);
+    border-radius: var(--radius-lg);
+    animation: tourPulse 2s infinite;
+}
+
+@keyframes tourPulse {
+    0%, 100% { box-shadow: 0 0 0 4px var(--primary-light), 0 0 40px rgba(14, 165, 233, 0.5); }
+    50% { box-shadow: 0 0 0 8px var(--primary-subtle), 0 0 60px rgba(14, 165, 233, 0.7); }
+}
+
+#welcomeTourModal .modal-content {
+    border-radius: var(--radius-xl);
+    border: none;
+    overflow: hidden;
+}
+
+#welcomeTourModal .modal-header {
+    background: var(--gradient-primary);
+    border: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.tour-slide { display: none; animation: fadeIn 0.4s ease-out; }
+.tour-slide.active { display: block; }
+
+.tour-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.tour-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--gray-900);
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.tour-description {
+    font-size: 1rem;
+    color: var(--gray-600);
+    text-align: center;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.tour-features {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.tour-features h6 {
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.tour-features h6 i { color: var(--primary); margin-right: 0.5rem; }
+
+.tour-feature-list { list-style: none; padding: 0; margin: 0; }
+
+.tour-feature-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--gray-700);
+}
+
+.tour-feature-list li i { color: var(--success); font-size: 1.1rem; margin-top: 0.25rem; }
+.tour-feature-list li.restriction i { color: var(--warning); }
+
+.tour-tips {
+    background: linear-gradient(135deg, var(--info-bg) 0%, var(--white) 100%);
+    border: 1px solid var(--info-light);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.tour-tips h6 {
+    font-weight: 700;
+    color: var(--info);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.tour-tips h6 i { margin-right: 0.5rem; }
+.tour-tips p { font-size: 0.9rem; color: var(--gray-700); margin: 0; }
+
+.tour-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-subtle);
+    color: var(--primary-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    #welcomeTourModal .modal-dialog { margin: 1rem; }
+    .tour-icon { width: 60px; height: 60px; font-size: 2rem; }
+    .tour-title { font-size: 1.25rem; }
+    .tour-description { font-size: 0.9rem; }
+}
